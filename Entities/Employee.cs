@@ -1,18 +1,18 @@
-﻿namespace API.Entities
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace API.Entities
 {
     public class Employee
     {
-        public int Id { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string Gender { get; set; }
-        public string City { get; set; }
-        public string Street { get; set; }
+        [ForeignKey("AppUser")]
+        public int EmployeeId { get; set; }
         public string PhoneNumber { get; set; }
-        public string Email { get; set; }
-        public DateOnly BirthDate { get; set; }
         public DateOnly JoinedDate { get; set; }
-        public Location Location { get; set; }
-        public Location LocationId { get; set; }
+        public int AppUserId { get; set; }
+        public AppUser AppUser { get; set; }
+        //public Location Location { get; set; }
+        //public int LocationId { get; set; }
+        //public LeaveBalance LeaveBalance { get; set; }
+        //public int LeaveBalanceId { get; set; }
     }
 }

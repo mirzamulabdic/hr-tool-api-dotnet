@@ -1,4 +1,6 @@
 ﻿using API.Data;
+using API.Interfaces;
+using API.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Extensions
@@ -12,6 +14,8 @@ namespace API.Extensions
             {
                 opt.UseNpgsql(config.GetConnectionString("DefaultConnection"));
             });
+            services.AddCors();
+            services.AddScoped<ITokenService, TokenService>();
             
             return services;
         }
