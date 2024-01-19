@@ -1,4 +1,7 @@
 ﻿using API.Data;
+using API.Interfaces;
+using API.Repositories;
+using API.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Extensions
@@ -12,7 +15,11 @@ namespace API.Extensions
             {
                 opt.UseNpgsql(config.GetConnectionString("DefaultConnection"));
             });
-            
+            services.AddCors();
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+            services.AddScoped<ITokenService, TokenService>();
+            services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+
             return services;
         }
 

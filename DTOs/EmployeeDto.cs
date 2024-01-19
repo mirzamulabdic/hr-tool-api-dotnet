@@ -1,18 +1,17 @@
-﻿namespace API.Entities
+﻿namespace API.DTOs
 {
-    public class Employee
+    public class EmployeeDto
     {
-        public int Id { get; set; }
+        public int EmployeeId { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        public string Password { get; set; }
         public string Gender { get; set; }
         public string City { get; set; }
         public string Street { get; set; }
-        public string PhoneNumber { get; set; }
         public string Email { get; set; }
-        public DateOnly BirthDate { get; set; }
+        public DateTime BirthDate { get; set; }
+        public string PhoneNumber { get; set; }
         public DateOnly JoinedDate { get; set; }
-        public Location Location { get; set; }
-        public Location LocationId { get; set; }
     }
 }
