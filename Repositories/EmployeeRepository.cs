@@ -25,10 +25,11 @@ namespace API.Repositories
             throw new NotImplementedException();
         }
 
-        public async Task<ActionResult<EmployeeDto>> GetEmployeeByIdAsync(int Id)
+        public async Task<EmployeeDto> GetEmployeeByIdAsync(int Id)
         {
             return await _dataContext.Users
                 .Where(x => x.Id == Id)
+                .Include(lb=> lb.LeaveBalance)
                 .ProjectTo<EmployeeDto>(_mapper.ConfigurationProvider)
                 .SingleOrDefaultAsync();
         }

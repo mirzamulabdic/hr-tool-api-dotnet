@@ -19,5 +19,6 @@ namespace API.Entities
         public DateOnly JoinedDate { get; set; }
         public List<LeaveRequest> LeaveRequestCreated { get; set; }
         public List<LeaveRequest> LeaveRequestReviewed { get; set; }
+        public LeaveBalance LeaveBalance { get; set; }
     }
 }

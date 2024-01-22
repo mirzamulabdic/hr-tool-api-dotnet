@@ -13,5 +13,13 @@
         public DateTime BirthDate { get; set; }
         public string PhoneNumber { get; set; }
         public DateOnly JoinedDate { get; set; }
+        public int VacationDays { get; set; }
+        public int VacationDaysTaken { get; set; }
+        public int RemoteWorkDays { get; set; }
+        public int RemoteWorkDaysTaken { get; set; }
+        public int SickDays { get; set; }
+        public int SickDaysTaken { get; set; }
+        public int FamilyDays { get; set; }
+        public int FamilyDaysTaken { get; set; }
     }
 }

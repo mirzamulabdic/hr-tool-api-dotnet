@@ -8,6 +8,6 @@ namespace API.Interfaces
     {
         Task<bool> SaveAllAsync();
         Task<ActionResult> AddNewEmployee(NewEmployeeDto newEmployeeDto);
-        Task<ActionResult<EmployeeDto>> GetEmployeeByIdAsync(int Id);
+        Task<EmployeeDto> GetEmployeeByIdAsync(int Id);
     }
 }
