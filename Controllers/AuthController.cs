@@ -34,7 +34,8 @@ namespace API.Controllers
                     Street = registerDto.Street,
                     Gender = registerDto.Gender,
                     PhoneNumber = "061",
-                    JoinedDate = new DateOnly()
+                    JoinedDate = new DateOnly(),
+                    LeaveBalance = new LeaveBalance()
                 };
 
                 _dataContext.Users.Add(user);

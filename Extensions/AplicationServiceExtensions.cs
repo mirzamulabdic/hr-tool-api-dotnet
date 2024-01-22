@@ -15,10 +15,13 @@ namespace API.Extensions
             {
                 opt.UseNpgsql(config.GetConnectionString("DefaultConnection"));
             });
+
             services.AddCors();
+
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+            services.AddScoped<ILeaveRequestRepository, LeaveRequestRepository>();
 
             return services;
         }
