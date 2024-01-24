@@ -8,5 +8,9 @@ namespace API.Interfaces
     {
         Task<bool> SaveAllAsync();
         void CreateLeaveRequest(NewLeaveRequestDto newLeaveRequestDto);
+        void CancelLeaveRequest(LeaveRequest leaveRequest);
+        Task<IEnumerable<LeaveRequestDto>> GetLeaveRequestsAsync(int UserId);
+        Task<LeaveRequest> GetLeaveRequestAsync(int LeaveRequestId);
+
     }
 }

@@ -16,7 +16,10 @@ namespace API.Helpers
                 .ForMember(dest => dest.SickDays, opt => opt.MapFrom(src => src.LeaveBalance.SickDays))
                 .ForMember(dest => dest.SickDaysTaken, opt => opt.MapFrom(src => src.LeaveBalance.SickDaysTaken))
                 .ForMember(dest => dest.FamilyDays, opt => opt.MapFrom(src => src.LeaveBalance.FamilyDays))
-                .ForMember(dest => dest.FamilyDaysTaken, opt => opt.MapFrom(src => src.LeaveBalance.FamilyDaysTaken));
+                .ForMember(dest => dest.FamilyDaysTaken, opt => opt.MapFrom(src => src.LeaveBalance.FamilyDaysTaken))
+                .ForMember(dest => dest.LeaveBalanceId, opt => opt.MapFrom(src => src.LeaveBalance.Id));
+            CreateMap<LeaveBalance, LeaveBalanceDto>();    
+            CreateMap<LeaveRequest, LeaveRequestDto>();
 
         }
     }

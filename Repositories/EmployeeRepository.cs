@@ -34,6 +34,14 @@ namespace API.Repositories
                 .SingleOrDefaultAsync();
         }
 
+        public async Task<LeaveBalanceDto> GetLeaveBalance(int EmployeeID)
+        {
+            return await _dataContext.LeaveBalances
+                .Where(x => x.EmployeeId == EmployeeID)
+                .ProjectTo<LeaveBalanceDto>(_mapper.ConfigurationProvider)
+                .SingleOrDefaultAsync();
+        }
+
         public async Task<bool> SaveAllAsync()
         {
             return await _dataContext.SaveChangesAsync() > 0;

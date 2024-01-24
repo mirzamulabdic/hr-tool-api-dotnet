@@ -22,6 +22,7 @@ namespace API.Extensions
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IEmployeeRepository, EmployeeRepository>();
             services.AddScoped<ILeaveRequestRepository, LeaveRequestRepository>();
+            services.AddScoped<ILeaveBalanceRepository, LeaveBalanceRepository>();
 
             return services;
         }
