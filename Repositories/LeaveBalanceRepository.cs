@@ -4,6 +4,7 @@ using API.Entities;
 using API.Interfaces;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace API.Repositories
@@ -17,10 +18,10 @@ namespace API.Repositories
             this._dataContext = dataContext;
         }
 
-        public void UpdateLeaveBalance(int leaveBalanceId, string leaveType, int days)
+        public async Task<LeaveBalance> UpdateLeaveBalance(int leaveBalanceId, string leaveType, int days)
         {
 
-            var result = _dataContext.LeaveBalances.SingleOrDefault(x=> x.Id == leaveBalanceId);
+            var result =  await _dataContext.LeaveBalances.SingleOrDefaultAsync(x=> x.Id == leaveBalanceId);
             
             if (result != null)
 
@@ -41,6 +42,8 @@ namespace API.Repositories
                 default:
                     break;
             }
+
+            return result;
         }
     }
 }

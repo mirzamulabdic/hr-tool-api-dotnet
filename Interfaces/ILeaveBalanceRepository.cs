@@ -6,6 +6,6 @@ namespace API.Interfaces
 {
     public interface ILeaveBalanceRepository
     {
-        void UpdateLeaveBalance(int leaveBalanceId, string leaveType, int days);
+        Task<LeaveBalance> UpdateLeaveBalance(int leaveBalanceId, string leaveType, int days);
     }
 }

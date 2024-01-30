@@ -2,6 +2,7 @@
 using API.DTOs;
 using API.Entities;
 using API.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,66 +10,34 @@ namespace API.Controllers
 {
         public class AuthController : BaseApiController
         {
-            private readonly DataContext _dataContext;
+       
+            private readonly UserManager<AppUser> _userManager;
             private readonly ITokenService _tokenService;
 
-            public AuthController(DataContext dataContext, ITokenService tokenService)
+            public AuthController(UserManager<AppUser> userManager, ITokenService tokenService)
             {
-                this._dataContext = dataContext;
+                this._userManager = userManager;
                 this._tokenService = tokenService;
             }
 
-            [HttpPost("register")]
-            public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
-            {
-                if (await UserExists(registerDto.Email)) return BadRequest("That user already exist");
-
-                var user = new AppUser
-                {
-                    FirstName = registerDto.FirstName,
-                    LastName = registerDto.LastName,
-                    Email = registerDto.Email,
-                    Password = registerDto.Password,
-                    BirthDate = DateTime.UtcNow,
-                    City = registerDto.City,
-                    Street = registerDto.Street,
-                    Gender = registerDto.Gender,
-                    PhoneNumber = "061",
-                    JoinedDate = new DateOnly(),
-                    LeaveBalance = new LeaveBalance()
-                };
-
-                _dataContext.Users.Add(user);
-                await _dataContext.SaveChangesAsync();
-
-                return new UserDto
-                {
-                    UserId = user.Id.ToString(),
-                    Email = user.Email,
-                    Token = "test"
-                };
-            }
 
             [HttpPost("login")]
             public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
             {
-                var user = await _dataContext.Users.SingleOrDefaultAsync(x => x.Email == loginDto.Email);
+                var user = await _userManager.Users.SingleOrDefaultAsync(x => x.Email == loginDto.Email);
 
-                if (user == null) return BadRequest();
+                if (user == null) return Unauthorized();
+                var result = await _userManager.CheckPasswordAsync(user, loginDto.Password);
+                Console.WriteLine(result);
 
-                if (user.Password != loginDto.Password) return BadRequest("Unauthorized");
+                if (!result) return Unauthorized();
 
                 return new UserDto
                 {
                     UserId = user.Id.ToString(),
                     Email = user.Email,
-                    Token = _tokenService.CreateToken(user),
+                    Token = await _tokenService.CreateToken(user),
                 };
-            }
-
-            public async Task<bool> UserExists(string email)
-            {
-                return await _dataContext.Users.AnyAsync(x => x.Email == email.ToLower());
             }
         }
 }

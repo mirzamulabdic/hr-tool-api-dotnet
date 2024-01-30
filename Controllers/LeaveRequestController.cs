@@ -53,9 +53,21 @@ namespace API.Controllers
             newLeaveRequestDto.UserId = User.GetUserId();
 
             _leaveRequestRepository.CreateLeaveRequest(newLeaveRequestDto);
+            Console.WriteLine(employee.RemoteWorkDaysTaken);
+            var leaveBalanceUpdated = await _leaveBalanceRepository.UpdateLeaveBalance(employee.LeaveBalanceId, leaveType, newLeaveRequestDto.DurationDays);
 
-            _leaveBalanceRepository.UpdateLeaveBalance(employee.LeaveBalanceId, leaveType, newLeaveRequestDto.DurationDays);
-            if (await _leaveRequestRepository.SaveAllAsync()) return Ok(employee);
+            employee.VacationDaysTaken = leaveBalanceUpdated.VacationDaysTaken;
+            employee.RemoteWorkDaysTaken = leaveBalanceUpdated.RemoteWorkDaysTaken;
+            employee.FamilyDaysTaken = leaveBalanceUpdated.FamilyDaysTaken;
+            employee.SickDaysTaken = leaveBalanceUpdated.SickDaysTaken;
+
+
+            if (await _employeeRepository.SaveAllAsync()) { 
+                
+                Console.WriteLine(employee.RemoteWorkDaysTaken);
+                return Ok(employee); 
+            
+            }
 
             return BadRequest("Something went wrong");
 

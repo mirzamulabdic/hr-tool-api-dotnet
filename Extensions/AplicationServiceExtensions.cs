@@ -16,7 +16,6 @@ namespace API.Extensions
                 opt.UseNpgsql(config.GetConnectionString("DefaultConnection"));
             });
 
-            services.AddCors();
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddScoped<ITokenService, TokenService>();
