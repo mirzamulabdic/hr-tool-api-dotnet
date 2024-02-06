@@ -17,9 +17,18 @@ namespace API.Helpers
                 .ForMember(dest => dest.SickDaysTaken, opt => opt.MapFrom(src => src.LeaveBalance.SickDaysTaken))
                 .ForMember(dest => dest.FamilyDays, opt => opt.MapFrom(src => src.LeaveBalance.FamilyDays))
                 .ForMember(dest => dest.FamilyDaysTaken, opt => opt.MapFrom(src => src.LeaveBalance.FamilyDaysTaken))
-                .ForMember(dest => dest.LeaveBalanceId, opt => opt.MapFrom(src => src.LeaveBalance.Id));
+                .ForMember(dest => dest.LeaveBalanceId, opt => opt.MapFrom(src => src.LeaveBalance.Id))
+                .ForMember(dest => dest.ManagedBy, opt => opt.MapFrom(src => src.Manager.ManagerId));
+            CreateMap<AppUser, EmployeesWithRolesDto>()
+                .ForMember(dest => dest.ManagerId, opt => opt.MapFrom(src => src.Manager.Id))
+                .ForMember(dest => dest.Roles, opt => opt.MapFrom(src => src.UserRoles.Select(ur => ur.Role)));
+
+            CreateMap<UserManage, UserManagingDto>();
             CreateMap<LeaveBalance, LeaveBalanceDto>();    
             CreateMap<LeaveRequest, LeaveRequestDto>();
+
+
+
 
         }
     }

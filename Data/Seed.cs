@@ -22,18 +22,11 @@ namespace API.Data
                 new AppRole{Name = "Employee"},
             };
 
+
             foreach (var role in roles)
             {
                 await roleManager.CreateAsync(role);
             }
-
-            //foreach (var user in users)
-            //{
-            //    using var hmac = new HMACSHA512();
-            //    user.UserName = user.UserName.ToLower();
-            //    await userManager.CreateAsync(user, "Pa$$w0rd");
-            //    await userManager.AddToRoleAsync(user, "Member");
-            //}
 
             var admin = new AppUser
             {
@@ -42,7 +35,7 @@ namespace API.Data
             };
 
             await userManager.CreateAsync(admin, "P@ssw0rd");
-            await userManager.AddToRolesAsync(admin, new[] { "Admin", "Manager", "HR" });
+            await userManager.AddToRolesAsync(admin, new[] { "Admin" });
         }
     }
 }

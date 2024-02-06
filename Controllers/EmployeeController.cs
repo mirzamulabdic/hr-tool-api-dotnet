@@ -16,40 +16,51 @@ namespace API.Controllers
     public class EmployeeController : BaseApiController
     {
         private readonly UserManager<AppUser> _userManager;
+        private readonly DataContext _dataContext;
         private readonly IEmployeeRepository _employeeRepository;
         private readonly ILeaveBalanceRepository _leaveBalanceRepository;
 
         public EmployeeController(UserManager<AppUser> userManager,
+            DataContext dataContext,
             IEmployeeRepository employeeRepository, 
             ILeaveBalanceRepository leaveBalanceRepository)
         {
             this._userManager = userManager;
+            this._dataContext = dataContext;
             this._employeeRepository = employeeRepository;
             this._leaveBalanceRepository = leaveBalanceRepository;
         }
 
-        [HttpPost("new-employee")]
-        public async Task<ActionResult<UserDto>> AddNewEmployee(RegisterDto registerDto)
+        [HttpGet("my-info")]
+        public async Task<ActionResult<EmployeeDto>> GetMyInfo()
         {
-            if (await UserExists(registerDto.Email)) return BadRequest("That user already exist");
+            return await _employeeRepository.GetEmployeeByIdAsync(User.GetUserId());
+        }
+
+        [Authorize(Policy = "RequireHRManagerRoles")]
+        [HttpPost("new-employee")]
+        public async Task<ActionResult<UserDto>> AddNewEmployee(NewEmployeeDto newEmployeeDto)
+        {
+            if (await UserExists(newEmployeeDto.Email)) return BadRequest("That user already exist");
 
 
             var user = new AppUser
             {
-                FirstName = registerDto.FirstName,
-                LastName = registerDto.LastName,
-                UserName = (registerDto.FirstName + registerDto.LastName).ToLower(),
-                Email = registerDto.Email,
-                BirthDate = registerDto.BirthDate,
-                City = registerDto.City,
-                Street = registerDto.Street,
-                Gender = registerDto.Gender.ToLower(),
-                PhoneNumber = registerDto.PhoneNumber,
-                JoinedDate = DateOnly.FromDateTime(registerDto.JoinedDate),
-                LeaveBalance = new LeaveBalance()
+                FirstName = newEmployeeDto.FirstName,
+                LastName = newEmployeeDto.LastName,
+                UserName = (newEmployeeDto.FirstName + newEmployeeDto.LastName).ToLower(),
+                Email = newEmployeeDto.Email,
+                BirthDate = newEmployeeDto.BirthDate,
+                City = newEmployeeDto.City,
+                Street = newEmployeeDto.Street,
+                Gender = newEmployeeDto.Gender,
+                PhoneNumber = newEmployeeDto.PhoneNumber,
+                JoinedDate = DateOnly.FromDateTime(newEmployeeDto.JoinedDate),
+                LeaveBalance = new LeaveBalance(),
+                
             };
 
-            var result = await _userManager.CreateAsync(user, (registerDto.FirstName + registerDto.LastName).ToLower() + "HR1!");
+            var result = await _userManager.CreateAsync(user, (newEmployeeDto.FirstName + newEmployeeDto.LastName).ToLower() + "HR1!");
 
             if (!result.Succeeded) return BadRequest(result.Errors);
 
@@ -57,12 +68,24 @@ namespace API.Controllers
 
             if (!roleResult.Succeeded) return BadRequest(result.Errors);
 
+            var managing = new UserManage
+            {
+                ManagerId = int.Parse(newEmployeeDto.ManagerId),
+                Employee = user
+            };
+
+            _dataContext.UserManages.Add(managing);
+
+
+            await _dataContext.SaveChangesAsync();
+
             return new UserDto
             {
                 UserId = user.Id.ToString(),
                 Email = user.Email
             };
         }
+
 
         [HttpGet("leave-balance")]
         public async Task<ActionResult<LeaveBalanceDto>> GetLeaveBalance() 
@@ -73,7 +96,7 @@ namespace API.Controllers
         [HttpPut("update-leave-balance")]
         public async Task<ActionResult> UpdateLeaveBalance(LeaveBalanceUpdateDto leaveBalanceUpdateDto)
         {
-            _leaveBalanceRepository.UpdateLeaveBalance(leaveBalanceUpdateDto.LeaveBalanceId,leaveBalanceUpdateDto.LeaveType ,leaveBalanceUpdateDto.Days);
+            var updatedLeaveBalance = _leaveBalanceRepository.UpdateLeaveBalance(leaveBalanceUpdateDto.LeaveBalanceId,leaveBalanceUpdateDto.LeaveType ,leaveBalanceUpdateDto.Days);
             return Ok();
         }
 

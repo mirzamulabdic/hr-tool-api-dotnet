@@ -25,7 +25,7 @@ namespace API.Repositories
             _dataContext.LeaveRequests.Remove(leaveRequest);
         }
 
-        public async void CreateLeaveRequest(NewLeaveRequestDto newLeaveRequestDto)
+        public void CreateLeaveRequest(NewLeaveRequestDto newLeaveRequestDto)
         {
             var leaveRequest = new LeaveRequest
             {
@@ -36,10 +36,10 @@ namespace API.Repositories
                 Comment = newLeaveRequestDto.Comment,
                 LeaveStatus = "Pending",
                 LeaveSubmitterId = newLeaveRequestDto.UserId,
-                LeaveReviewerId = 1
+                LeaveReviewerId = newLeaveRequestDto.ReviewerId,
             };
 
-            await _dataContext.LeaveRequests.AddAsync(leaveRequest);
+            _dataContext.LeaveRequests.Add(leaveRequest);
         }
 
         public async Task<LeaveRequest> GetLeaveRequestAsync(int LeaveRequestId)

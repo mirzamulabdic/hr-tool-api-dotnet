@@ -28,7 +28,6 @@ namespace API.Controllers
         [HttpPost("new-request")]
         public async Task<ActionResult<EmployeeDto>> CreateLeaveRequest(NewLeaveRequestDto newLeaveRequestDto)
         {
-            // Vacation RemoteWork SickDay FamilyLeave
 
             var employee = await _employeeRepository.GetEmployeeByIdAsync(User.GetUserId());
 
@@ -52,8 +51,15 @@ namespace API.Controllers
 
             newLeaveRequestDto.UserId = User.GetUserId();
 
+            if (employee.ManagedBy == null)
+            {
+                newLeaveRequestDto.ReviewerId = 1;
+            }
+            else
+            {
+                newLeaveRequestDto.ReviewerId = employee.ManagedBy ?? default(int);
+            }
             _leaveRequestRepository.CreateLeaveRequest(newLeaveRequestDto);
-            Console.WriteLine(employee.RemoteWorkDaysTaken);
             var leaveBalanceUpdated = await _leaveBalanceRepository.UpdateLeaveBalance(employee.LeaveBalanceId, leaveType, newLeaveRequestDto.DurationDays);
 
             employee.VacationDaysTaken = leaveBalanceUpdated.VacationDaysTaken;
@@ -62,11 +68,8 @@ namespace API.Controllers
             employee.SickDaysTaken = leaveBalanceUpdated.SickDaysTaken;
 
 
-            if (await _employeeRepository.SaveAllAsync()) { 
-                
-                Console.WriteLine(employee.RemoteWorkDaysTaken);
+            if (await _leaveRequestRepository.SaveAllAsync()) { 
                 return Ok(employee); 
-            
             }
 
             return BadRequest("Something went wrong");
@@ -88,9 +91,9 @@ namespace API.Controllers
 
             var leaveRequest = await _leaveRequestRepository.GetLeaveRequestAsync(leaveRequestId);
 
-            //Console.WriteLine(leaveRequest.DurationDays);
+
             _leaveRequestRepository.CancelLeaveRequest(leaveRequest);
-            _leaveBalanceRepository.UpdateLeaveBalance(employee.LeaveBalanceId, leaveRequest.LeaveType, -leaveRequest.DurationDays);
+            var leaveBalanceUpdated = await _leaveBalanceRepository.UpdateLeaveBalance(employee.LeaveBalanceId, leaveRequest.LeaveType, -leaveRequest.DurationDays);
 
             await _dataContext.SaveChangesAsync();
             return Ok();

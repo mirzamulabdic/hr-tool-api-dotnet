@@ -30,6 +30,10 @@ namespace API.Extensions
                          ValidateAudience = false,
                      };
                  });
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("RequireHRManagerRoles", policy => policy.RequireRole("Admin", "Manager", "HR"));
+            });
 
 
             return services;

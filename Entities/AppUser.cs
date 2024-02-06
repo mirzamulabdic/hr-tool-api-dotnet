@@ -12,12 +12,14 @@ namespace API.Entities
         public string Gender { get; set; }
         public string City { get; set; }
         public string Street { get; set; }
-        public string PhoneNumber { get; set; }
         public DateTime BirthDate { get; set; }
         public DateOnly JoinedDate { get; set; }
         public List<LeaveRequest> LeaveRequestCreated { get; set; }
         public List<LeaveRequest> LeaveRequestReviewed { get; set; }
         public LeaveBalance LeaveBalance { get; set; }
         public ICollection<AppUserRole> UserRoles { get; set; }
+        public UserManage Manager { get; set; }
+        public ICollection<UserManage> ManagedEmployees { get; set; }
+
     }
 }

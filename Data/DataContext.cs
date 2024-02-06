@@ -5,8 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Data
 {
-    public class DataContext : IdentityDbContext<AppUser, AppRole, int, IdentityUserClaim<int>, 
-            AppUserRole, IdentityUserLogin<int>, IdentityRoleClaim<int>, IdentityUserToken<int>>
+    public class DataContext : IdentityDbContext<AppUser, AppRole, int,
+        IdentityUserClaim<int>, AppUserRole, IdentityUserLogin<int>,
+        IdentityRoleClaim<int>, IdentityUserToken<int>>
     {
         public DataContext(DbContextOptions options) : base(options)
         {
@@ -15,6 +16,7 @@ namespace API.Data
 
         public DbSet<LeaveRequest> LeaveRequests { get; set; }
         public DbSet<LeaveBalance> LeaveBalances { get; set; }
+        public DbSet<UserManage> UserManages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -29,8 +31,18 @@ namespace API.Data
             modelBuilder.Entity<AppRole>()
                 .HasMany(ur => ur.UserRoles)
                 .WithOne(u => u.Role)
-                .HasForeignKey(ur => ur.UserId)
+                .HasForeignKey(ur => ur.RoleId)
                 .IsRequired();
+
+            modelBuilder.Entity<UserManage>()
+                .HasOne(um => um.Manager)
+                .WithMany(u => u.ManagedEmployees)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<UserManage>()
+                .HasOne(um => um.Employee)
+                .WithOne(u => u.Manager)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<LeaveRequest>()
                 .HasOne(ls => ls.LeaveSubmitter)

@@ -21,9 +21,9 @@ namespace API.Repositories
         public async Task<LeaveBalance> UpdateLeaveBalance(int leaveBalanceId, string leaveType, int days)
         {
 
-            var result =  await _dataContext.LeaveBalances.SingleOrDefaultAsync(x=> x.Id == leaveBalanceId);
-            
-            if (result != null)
+            var result =  _dataContext.LeaveBalances.SingleOrDefault(x=> x.Id == leaveBalanceId);
+
+            if (result == null) return null;
 
             switch(leaveType)
             {

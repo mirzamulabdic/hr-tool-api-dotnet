@@ -1,4 +1,6 @@
-﻿namespace API.DTOs
+﻿using API.Entities;
+
+namespace API.DTOs
 {
     public class EmployeeDto
     {
@@ -21,5 +23,7 @@
         public int FamilyDays { get; set; }
         public int FamilyDaysTaken { get; set; }
         public int LeaveBalanceId { get; set; }
+        public int? ManagedBy { get; set; } = null;
+        public List<UserManagingDto> ManagedEmployees { get; set; }
     }
 }
