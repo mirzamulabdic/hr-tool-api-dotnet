@@ -3,6 +3,8 @@
     public class LeaveRequestDto
     {
         public int LeaveRequestId { get; set; }
+        public int LeaveSubmitterId { get; set; }
+        public string SubmitterFullName { get; set; }
         public string LeaveType { get; set; }
         public string LeaveStatus { get; set; }
         public DateTime StartDate { get; set; }

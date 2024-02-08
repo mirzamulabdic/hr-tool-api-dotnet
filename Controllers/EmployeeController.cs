@@ -70,7 +70,7 @@ namespace API.Controllers
 
             var managing = new UserManage
             {
-                ManagerId = int.Parse(newEmployeeDto.ManagerId),
+                ManagerId = newEmployeeDto.ManagerId,
                 Employee = user
             };
 
@@ -96,7 +96,7 @@ namespace API.Controllers
         [HttpPut("update-leave-balance")]
         public async Task<ActionResult> UpdateLeaveBalance(LeaveBalanceUpdateDto leaveBalanceUpdateDto)
         {
-            var updatedLeaveBalance = _leaveBalanceRepository.UpdateLeaveBalance(leaveBalanceUpdateDto.LeaveBalanceId,leaveBalanceUpdateDto.LeaveType ,leaveBalanceUpdateDto.Days);
+            var updatedLeaveBalance = _leaveBalanceRepository.UpdateLeaveBalance(leaveBalanceUpdateDto.LeaveBalanceId, leaveBalanceUpdateDto.LeaveType ,leaveBalanceUpdateDto.Days);
             return Ok();
         }
 

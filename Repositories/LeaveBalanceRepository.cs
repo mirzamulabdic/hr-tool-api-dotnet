@@ -1,6 +1,7 @@
 ﻿using API.Data;
 using API.DTOs;
 using API.Entities;
+using API.Enums;
 using API.Interfaces;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -18,7 +19,7 @@ namespace API.Repositories
             this._dataContext = dataContext;
         }
 
-        public async Task<LeaveBalance> UpdateLeaveBalance(int leaveBalanceId, string leaveType, int days)
+        public async Task<LeaveBalance> UpdateLeaveBalance(int leaveBalanceId, LeaveTypeEnum leaveType, int days)
         {
 
             var result =  _dataContext.LeaveBalances.SingleOrDefault(x=> x.Id == leaveBalanceId);
@@ -27,16 +28,16 @@ namespace API.Repositories
 
             switch(leaveType)
             {
-                case "vacation":
+                case LeaveTypeEnum.Vacation:
                     result.VacationDaysTaken += days;
                     break;
-                case "remotework":
+                case LeaveTypeEnum.RemoteWork:
                     result.RemoteWorkDaysTaken += days;
                     break;
-                case "sickday":
+                case LeaveTypeEnum.SickDay:
                     result.SickDaysTaken += days;
                     break;
-                case "familyleave":
+                case LeaveTypeEnum.FamilyLeave:
                     result.FamilyDaysTaken += days;
                     break;
                 default:

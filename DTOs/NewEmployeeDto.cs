@@ -11,6 +11,6 @@
         public string Email { get; set; }
         public string PhoneNumber { get; set; }
         public DateTime JoinedDate { get; set; }
-        public string ManagerId { get; set; }
+        public int ManagerId { get; set; }
     }
 }

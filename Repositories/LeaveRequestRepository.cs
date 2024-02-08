@@ -1,6 +1,7 @@
 ﻿using API.Data;
 using API.DTOs;
 using API.Entities;
+using API.Enums;
 using API.Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -34,9 +35,10 @@ namespace API.Repositories
                 EndDate = newLeaveRequestDto.EndDate,
                 DurationDays = newLeaveRequestDto.DurationDays,
                 Comment = newLeaveRequestDto.Comment,
-                LeaveStatus = "Pending",
+                LeaveStatus = LeaveStatusEnum.Pending,
                 LeaveSubmitterId = newLeaveRequestDto.UserId,
                 LeaveReviewerId = newLeaveRequestDto.ReviewerId,
+                SubmitterFullName = newLeaveRequestDto.SubmitterFullName,
             };
 
             _dataContext.LeaveRequests.Add(leaveRequest);
@@ -53,6 +55,24 @@ namespace API.Repositories
                 .Where(x => x.LeaveSubmitterId == UserId)
                 .ProjectTo<LeaveRequestDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
+        }
+
+        public async Task<IEnumerable<LeaveRequestDto>> GetLeaveRequestsForMyEmployeesAsync(int ManagerId)
+        {
+            return await _dataContext.LeaveRequests
+                .Where(x => x.LeaveReviewerId == ManagerId && x.LeaveStatus == LeaveStatusEnum.Pending)
+                .ProjectTo<LeaveRequestDto>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+        }
+
+        public void ReviewLeaveRequest(int leaveRequestId, LeaveStatusEnum leaveStatus)
+        {
+            var leaveRequest = _dataContext.LeaveRequests.SingleOrDefault(x => x.LeaveRequestId == leaveRequestId);
+            
+            if (leaveRequest == null) return;
+            Console.WriteLine(leaveStatus);
+            leaveRequest.LeaveStatus = leaveStatus;
+            Console.WriteLine(leaveRequest.LeaveStatus);
         }
 
         public async Task<bool> SaveAllAsync()

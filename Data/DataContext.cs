@@ -21,6 +21,14 @@ namespace API.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+                    
+            modelBuilder.Entity<LeaveRequest>()
+            .Property(d => d.LeaveStatus)
+            .HasConversion<string>();
+
+            modelBuilder.Entity<LeaveRequest>()
+            .Property(d => d.LeaveType)
+            .HasConversion<string>();
 
             modelBuilder.Entity<AppUser>()
                 .HasMany(ur => ur.UserRoles)

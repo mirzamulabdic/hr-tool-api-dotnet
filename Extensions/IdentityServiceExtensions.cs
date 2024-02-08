@@ -33,6 +33,7 @@ namespace API.Extensions
             services.AddAuthorization(options =>
             {
                 options.AddPolicy("RequireHRManagerRoles", policy => policy.RequireRole("Admin", "Manager", "HR"));
+                options.AddPolicy("RequireManagerRole", policy => policy.RequireRole("Manager"));
             });
 
 

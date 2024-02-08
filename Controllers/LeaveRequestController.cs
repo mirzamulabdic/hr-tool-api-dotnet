@@ -1,5 +1,6 @@
 ﻿using API.Data;
 using API.DTOs;
+using API.Enums;
 using API.Extensions;
 using API.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -31,25 +32,21 @@ namespace API.Controllers
 
             var employee = await _employeeRepository.GetEmployeeByIdAsync(User.GetUserId());
 
-            string leaveType = newLeaveRequestDto.LeaveType;
-
-            if (leaveType != "vacation" && leaveType != "remotework" && leaveType != "sickday" && leaveType != "familyleave")
-            {
-                return BadRequest("Invalid leave type!");
-            }
+            var leaveType = newLeaveRequestDto.LeaveType;
 
             bool checkIfLeaveIsPossible;
             checkIfLeaveIsPossible = leaveType switch
             {
-                "vacation" => CheckForVacationDaysBalance(employee.VacationDays, employee.VacationDaysTaken, newLeaveRequestDto.DurationDays),
-                "remotework" => CheckForVacationDaysBalance(employee.RemoteWorkDays, employee.RemoteWorkDaysTaken, newLeaveRequestDto.DurationDays),
-                "sickday" => CheckForVacationDaysBalance(employee.SickDays, employee.SickDaysTaken, newLeaveRequestDto.DurationDays),
+                LeaveTypeEnum.Vacation => CheckForVacationDaysBalance(employee.VacationDays, employee.VacationDaysTaken, newLeaveRequestDto.DurationDays),
+                LeaveTypeEnum.RemoteWork => CheckForVacationDaysBalance(employee.RemoteWorkDays, employee.RemoteWorkDaysTaken, newLeaveRequestDto.DurationDays),
+                LeaveTypeEnum.SickDay => CheckForVacationDaysBalance(employee.SickDays, employee.SickDaysTaken, newLeaveRequestDto.DurationDays),
                 _ => CheckForVacationDaysBalance(employee.FamilyDays, employee.FamilyDaysTaken, newLeaveRequestDto.DurationDays),
             };
 
             if (!checkIfLeaveIsPossible) return BadRequest("Leave balance invalid");
 
             newLeaveRequestDto.UserId = User.GetUserId();
+            newLeaveRequestDto.SubmitterFullName = employee.FirstName + " " + employee.LastName;
 
             if (employee.ManagedBy == null)
             {
@@ -59,6 +56,7 @@ namespace API.Controllers
             {
                 newLeaveRequestDto.ReviewerId = employee.ManagedBy ?? default(int);
             }
+
             _leaveRequestRepository.CreateLeaveRequest(newLeaveRequestDto);
             var leaveBalanceUpdated = await _leaveBalanceRepository.UpdateLeaveBalance(employee.LeaveBalanceId, leaveType, newLeaveRequestDto.DurationDays);
 
@@ -81,6 +79,40 @@ namespace API.Controllers
         {
             return await _leaveRequestRepository.GetLeaveRequestsAsync(User.GetUserId());
         }
+
+        [Authorize(Policy = "RequireManagerRole")]
+        [HttpGet("all-leaves-from-employees")]
+        public async Task<IEnumerable<LeaveRequestDto>> GetLeaveRequestsForMyEmployees()
+        {
+            var leaveRequests = await _leaveRequestRepository.GetLeaveRequestsForMyEmployeesAsync(User.GetUserId());
+
+            return leaveRequests;
+        }
+
+        [Authorize(Policy = "RequireManagerRole")]
+        [HttpPut("review-leave-request")]
+        public async Task<ActionResult> ReviewLeaveRequest(ReviewLeaveRequestDto reviewLeaveRequestDto)
+        {
+
+            var employee = await _employeeRepository.GetEmployeeByIdAsync(reviewLeaveRequestDto.EmployeeId);
+            Console.WriteLine(reviewLeaveRequestDto.LeaveStatusAction);
+            _leaveRequestRepository.ReviewLeaveRequest(reviewLeaveRequestDto.LeaveRequestId, reviewLeaveRequestDto.LeaveStatusAction);
+
+            if (reviewLeaveRequestDto.LeaveStatusAction == LeaveStatusEnum.Rejected)
+            {
+               var leaveBalanceUpdated = await _leaveBalanceRepository.
+                    UpdateLeaveBalance(employee.LeaveBalanceId, reviewLeaveRequestDto.LeaveType, 
+                    reviewLeaveRequestDto.DurationDays);
+            }
+            
+            if (await _leaveRequestRepository.SaveAllAsync())
+            {
+                return Ok();
+            }
+
+            return BadRequest("Something went wrong");
+        }
+
 
         [HttpDelete("cancel/{leaveRequestId}")]
         public async Task<ActionResult> CancelLeaveRequest(int leaveRequestId)
