@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
+    [Authorize]
     public class ManagerController : BaseApiController
     {
         private readonly UserManager<AppUser> _userManager;

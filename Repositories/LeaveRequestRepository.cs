@@ -44,6 +44,21 @@ namespace API.Repositories
             _dataContext.LeaveRequests.Add(leaveRequest);
         }
 
+        public async Task<IEnumerable<LeaveRequestDto>> GetLeaveEventsToday()
+        {
+
+            var currentDate = DateTime.Today.Date;
+            var leaveEvents = await _dataContext.LeaveRequests
+                            .Where(lr => DateTime.UtcNow.Date >= lr.StartDate.Date && 
+                                      (DateTime.UtcNow.Date <= lr.EndDate.Date || lr.StartDate.Date == lr.EndDate.Date)
+                                  && lr.LeaveStatus == LeaveStatusEnum.Approved
+                           )
+                            .ProjectTo<LeaveRequestDto>(_mapper.ConfigurationProvider)
+                            .ToListAsync();
+
+            return leaveEvents;
+        }
+
         public async Task<LeaveRequest> GetLeaveRequestAsync(int LeaveRequestId)
         {
             return await _dataContext.LeaveRequests.FindAsync(LeaveRequestId);

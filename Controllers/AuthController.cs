@@ -35,6 +35,7 @@ namespace API.Controllers
             {
                 UserId = user.Id.ToString(),
                 Email = user.Email,
+                FullName = user.FirstName + " " + user.LastName,
                 Token = await _tokenService.CreateToken(user),
             };
         }

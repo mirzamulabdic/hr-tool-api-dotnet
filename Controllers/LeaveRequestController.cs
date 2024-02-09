@@ -80,7 +80,7 @@ namespace API.Controllers
             return await _leaveRequestRepository.GetLeaveRequestsAsync(User.GetUserId());
         }
 
-        [Authorize(Policy = "RequireManagerRole")]
+        [Authorize(Policy = "RequireHRManagerRoles")]
         [HttpGet("all-leaves-from-employees")]
         public async Task<IEnumerable<LeaveRequestDto>> GetLeaveRequestsForMyEmployees()
         {
@@ -89,7 +89,7 @@ namespace API.Controllers
             return leaveRequests;
         }
 
-        [Authorize(Policy = "RequireManagerRole")]
+        [Authorize(Policy = "RequireHRManagerRoles")]
         [HttpPut("review-leave-request")]
         public async Task<ActionResult> ReviewLeaveRequest(ReviewLeaveRequestDto reviewLeaveRequestDto)
         {
