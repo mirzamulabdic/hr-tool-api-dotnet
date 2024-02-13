@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using API.Enums;
+using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace API.Entities
@@ -9,7 +10,7 @@ namespace API.Entities
         public int EmployeeId { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public string Gender { get; set; }
+        public GenderEnum Gender { get; set; }
         public string City { get; set; }
         public string Street { get; set; }
         public DateTime BirthDate { get; set; }

@@ -15,4 +15,10 @@
         Rejected,
         Taken
     }
+
+    public enum GenderEnum
+    {
+        Male,
+        Female
+    }
 }

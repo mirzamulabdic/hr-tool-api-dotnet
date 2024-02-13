@@ -24,7 +24,7 @@ namespace API.Helpers
                 .ForMember(dest => dest.Roles, opt => opt.MapFrom(src => src.UserRoles.Select(ur => ur.Role)));
 
             CreateMap<UserManage, UserManagingDto>();
-            CreateMap<LeaveBalance, LeaveBalanceDto>();    
+            CreateMap<LeaveBalance, LeaveBalanceDto>();
             CreateMap<LeaveRequest, LeaveRequestDto>();
 
 

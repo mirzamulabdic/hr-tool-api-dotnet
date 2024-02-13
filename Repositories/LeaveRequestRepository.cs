@@ -31,8 +31,8 @@ namespace API.Repositories
             var leaveRequest = new LeaveRequest
             {
                 LeaveType = newLeaveRequestDto.LeaveType,
-                StartDate = newLeaveRequestDto.StartDate,
-                EndDate = newLeaveRequestDto.EndDate,
+                StartDate = newLeaveRequestDto.StartDate.ToUniversalTime(),
+                EndDate = newLeaveRequestDto.EndDate.ToUniversalTime(),
                 DurationDays = newLeaveRequestDto.DurationDays,
                 Comment = newLeaveRequestDto.Comment,
                 LeaveStatus = LeaveStatusEnum.Pending,
@@ -47,14 +47,14 @@ namespace API.Repositories
         public async Task<IEnumerable<LeaveRequestDto>> GetLeaveEventsToday()
         {
 
-            var currentDate = DateTime.Today.Date;
+            var currentDate = DateOnly.FromDateTime(DateTime.UtcNow.Date.ToLocalTime());
+
             var leaveEvents = await _dataContext.LeaveRequests
-                            .Where(lr => DateTime.UtcNow.Date >= lr.StartDate.Date && 
-                                      (DateTime.UtcNow.Date <= lr.EndDate.Date || lr.StartDate.Date == lr.EndDate.Date)
-                                  && lr.LeaveStatus == LeaveStatusEnum.Approved
-                           )
-                            .ProjectTo<LeaveRequestDto>(_mapper.ConfigurationProvider)
-                            .ToListAsync();
+                                        .Where(lr => currentDate >= DateOnly.FromDateTime(lr.StartDate.ToLocalTime())
+                                            && currentDate <= DateOnly.FromDateTime(lr.EndDate.ToLocalTime())
+                                            && lr.LeaveStatus == LeaveStatusEnum.Approved)
+                                    .ProjectTo<LeaveRequestDto>(_mapper.ConfigurationProvider)
+                                    .ToListAsync();
 
             return leaveEvents;
         }
@@ -75,7 +75,8 @@ namespace API.Repositories
         public async Task<IEnumerable<LeaveRequestDto>> GetLeaveRequestsForMyEmployeesAsync(int ManagerId)
         {
             return await _dataContext.LeaveRequests
-                .Where(x => x.LeaveReviewerId == ManagerId && x.LeaveStatus == LeaveStatusEnum.Pending)
+                .Where(x => x.LeaveReviewerId == ManagerId && x.LeaveStatus == LeaveStatusEnum.Pending
+                )
                 .ProjectTo<LeaveRequestDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
         }
@@ -85,14 +86,32 @@ namespace API.Repositories
             var leaveRequest = _dataContext.LeaveRequests.SingleOrDefault(x => x.LeaveRequestId == leaveRequestId);
             
             if (leaveRequest == null) return;
-            Console.WriteLine(leaveStatus);
+
             leaveRequest.LeaveStatus = leaveStatus;
-            Console.WriteLine(leaveRequest.LeaveStatus);
         }
 
         public async Task<bool> SaveAllAsync()
         {
             return await _dataContext.SaveChangesAsync() > 0;
+        }
+
+        public async Task UpdateTakenLeaveRequests()
+        {
+
+            var currentDate = DateOnly.FromDateTime(DateTime.UtcNow.Date.ToLocalTime());
+            var leaveRequests = await _dataContext.LeaveRequests
+                    .Where(lr=> lr.LeaveStatus == LeaveStatusEnum.Approved
+                            && DateOnly.FromDateTime(lr.EndDate.ToLocalTime()) < currentDate)
+                    .ToListAsync();
+
+            foreach (var leaveRequest in leaveRequests)
+            {
+                leaveRequest.LeaveStatus = LeaveStatusEnum.Taken;
+
+                _dataContext.Entry(leaveRequest).State = EntityState.Modified;
+            }
+
+            await _dataContext.SaveChangesAsync();
         }
     }
 }

@@ -15,6 +15,7 @@ namespace API.Interfaces
         Task<IEnumerable<LeaveRequestDto>> GetLeaveRequestsForMyEmployeesAsync(int ManagerId);
         Task<LeaveRequest> GetLeaveRequestAsync(int LeaveRequestId);
 
+        Task UpdateTakenLeaveRequests();
         Task<IEnumerable<LeaveRequestDto>> GetLeaveEventsToday();
 
     }

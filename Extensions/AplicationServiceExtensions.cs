@@ -18,6 +18,7 @@ namespace API.Extensions
 
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+            services.AddHostedService<LeavesBackgroundService>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IEmployeeRepository, EmployeeRepository>();
             services.AddScoped<ILeaveRequestRepository, LeaveRequestRepository>();

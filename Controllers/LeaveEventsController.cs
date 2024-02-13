@@ -18,12 +18,7 @@ namespace API.Controllers
         [HttpGet("employees-on-leave-today")]
         public async Task<ActionResult<IEnumerable<LeaveRequestDto>>> GetEmployeesOnLeaveToday()
         {
-            //start: 05.Februar.2024  end: 10.Frebruar.2024
-
-            //08.Februar.2024
-            //Where()
             var leaveEvents = await _leaveRequestRepository.GetLeaveEventsToday();
-
 
             return Ok(leaveEvents);
         }
