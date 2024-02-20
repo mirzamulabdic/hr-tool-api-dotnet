@@ -2,6 +2,7 @@
 using API.DTOs;
 using API.Entities;
 using API.Enums;
+using API.Helpers;
 using API.Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -64,21 +65,47 @@ namespace API.Repositories
             return await _dataContext.LeaveRequests.FindAsync(LeaveRequestId);
         }
 
-        public async Task<IEnumerable<LeaveRequestDto>> GetLeaveRequestsAsync(int UserId)
+        public async Task<PagedList<LeaveRequestDto>> GetMyLeaveRequestsAsync(UserParams userParams)
+        {
+            var query = _dataContext.LeaveRequests.AsQueryable();
+
+            query = query.Where(lr => lr.LeaveSubmitterId == userParams.CurrentUserId);
+            query = query.Where(lr => lr.LeaveStatus == userParams.LeaveStatus);
+            query = query.OrderByDescending(lr => lr.DateCreated);
+
+            return await PagedList<LeaveRequestDto>.CreateAsync(
+                        query.ProjectTo<LeaveRequestDto>(_mapper.ConfigurationProvider).AsNoTracking(),
+                        userParams.PageNumber, userParams.PageSize);
+        }
+
+        public async Task<IEnumerable<LeaveRequestDto>> GetAllMyLeaveRequestsWithoutPagiantionAsync(int EmployeeId)
         {
             return await _dataContext.LeaveRequests
-                .Where(x => x.LeaveSubmitterId == UserId)
+                .Where(lr => lr.LeaveSubmitterId == EmployeeId && lr.LeaveStatus != LeaveStatusEnum.Rejected)
                 .ProjectTo<LeaveRequestDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<LeaveRequestDto>> GetLeaveRequestsForMyEmployeesAsync(int ManagerId)
+        public async Task<PagedList<LeaveRequestDto>> GetLeaveRequestsForMyEmployeesAsync(int ManagerId, UserParams userParams)
         {
-            return await _dataContext.LeaveRequests
-                .Where(x => x.LeaveReviewerId == ManagerId && x.LeaveStatus == LeaveStatusEnum.Pending
-                )
-                .ProjectTo<LeaveRequestDto>(_mapper.ConfigurationProvider)
-                .ToListAsync();
+            var query = _dataContext.LeaveRequests.AsQueryable();
+
+            query = query.Where(lr => lr.LeaveReviewerId == ManagerId);
+
+            if (userParams.LeaveStatus == LeaveStatusEnum.Approved) 
+            {
+                query = query.Where(lr => lr.LeaveStatus != LeaveStatusEnum.Rejected && lr.LeaveStatus != LeaveStatusEnum.Pending);
+            } else
+            {
+                query = query.Where(lr => lr.LeaveStatus == LeaveStatusEnum.Pending);
+            }
+
+            query = query.OrderByDescending(lr => lr.DateCreated);
+
+
+            return await PagedList<LeaveRequestDto>.CreateAsync(
+                        query.ProjectTo<LeaveRequestDto>(_mapper.ConfigurationProvider).AsNoTracking(),
+                        userParams.PageNumber, userParams.PageSize);
         }
 
         public void ReviewLeaveRequest(int leaveRequestId, LeaveStatusEnum leaveStatus)

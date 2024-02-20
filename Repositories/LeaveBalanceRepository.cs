@@ -43,7 +43,6 @@ namespace API.Repositories
                 default:
                     break;
             }
-            _dataContext.Entry(leaveType).State = EntityState.Modified;
 
             return result;
         }

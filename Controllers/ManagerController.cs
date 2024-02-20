@@ -33,7 +33,7 @@ namespace API.Controllers
                         u.LastName,
                         u.Email,
                         u.JoinedDate,
-                        managedByManagerId = (int?)u.Manager.Id,
+                        managedByManagerId = u.Manager.ManagerId,
                         Roles = u.UserRoles.Select(r => r.Role.Name).ToList()
                     })
                     .Where(u => u.Id != 1)

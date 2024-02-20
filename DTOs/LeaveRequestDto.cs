@@ -1,4 +1,6 @@
-﻿namespace API.DTOs
+﻿using API.Enums;
+
+namespace API.DTOs
 {
     public class LeaveRequestDto
     {

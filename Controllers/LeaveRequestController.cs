@@ -2,6 +2,7 @@
 using API.DTOs;
 using API.Enums;
 using API.Extensions;
+using API.Helpers;
 using API.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -33,7 +34,7 @@ namespace API.Controllers
             var employee = await _employeeRepository.GetEmployeeByIdAsync(User.GetUserId());
 
             var leaveType = newLeaveRequestDto.LeaveType;
-
+            
             bool checkIfLeaveIsPossible;
             checkIfLeaveIsPossible = leaveType switch
             {
@@ -42,7 +43,7 @@ namespace API.Controllers
                 LeaveTypeEnum.SickDay => CheckForVacationDaysBalance(employee.SickDays, employee.SickDaysTaken, newLeaveRequestDto.DurationDays),
                 _ => CheckForVacationDaysBalance(employee.FamilyDays, employee.FamilyDaysTaken, newLeaveRequestDto.DurationDays),
             };
-
+            
             if (!checkIfLeaveIsPossible) return BadRequest("Leave balance invalid");
 
             newLeaveRequestDto.UserId = User.GetUserId();
@@ -74,19 +75,35 @@ namespace API.Controllers
 
         }
 
-        [HttpGet]
-        public async Task<IEnumerable<LeaveRequestDto>> GetLeaveRequests() 
+        [HttpGet("my-leave-requests")]
+        public async Task<ActionResult<IEnumerable<LeaveRequestDto>>> GetLeaveRequests([FromQuery] UserParams userParams) 
         {
-            return await _leaveRequestRepository.GetLeaveRequestsAsync(User.GetUserId());
+            userParams.CurrentUserId = User.GetUserId();
+            
+            var leaveRequests = await _leaveRequestRepository.GetMyLeaveRequestsAsync(userParams);
+            
+            Response.AddPaginationHeader(new PaginationHeader(leaveRequests.CurrentPage, leaveRequests.PageSize
+                , leaveRequests.TotalCount, leaveRequests.TotalPages));
+
+            return Ok(leaveRequests);
+        }
+
+        [HttpGet("all-my-leave-requests")]
+        public async Task<IEnumerable<LeaveRequestDto>> GetMyAllLeaveRequests()
+        {
+            return await _leaveRequestRepository.GetAllMyLeaveRequestsWithoutPagiantionAsync(User.GetUserId());
         }
 
         [Authorize(Policy = "RequireHRManagerRoles")]
         [HttpGet("all-leaves-from-employees")]
-        public async Task<IEnumerable<LeaveRequestDto>> GetLeaveRequestsForMyEmployees()
+        public async Task<ActionResult<IEnumerable<LeaveRequestDto>>> GetLeaveRequestsForMyEmployees([FromQuery] UserParams userParams)
         {
-            var leaveRequests = await _leaveRequestRepository.GetLeaveRequestsForMyEmployeesAsync(User.GetUserId());
+            var leaveRequests = await _leaveRequestRepository.GetLeaveRequestsForMyEmployeesAsync(User.GetUserId(), userParams);
 
-            return leaveRequests;
+            Response.AddPaginationHeader(new PaginationHeader(leaveRequests.CurrentPage, leaveRequests.PageSize
+                , leaveRequests.TotalCount, leaveRequests.TotalPages));
+
+            return Ok(leaveRequests);
         }
 
         [Authorize(Policy = "RequireHRManagerRoles")]
