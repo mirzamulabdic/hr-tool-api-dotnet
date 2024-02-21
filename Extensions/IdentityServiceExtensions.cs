@@ -2,6 +2,7 @@
 using API.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -15,10 +16,12 @@ namespace API.Extensions
             services.AddIdentityCore<AppUser>(opt =>
             {
                 opt.Password.RequireNonAlphanumeric = false;
+                opt.SignIn.RequireConfirmedAccount = true;
             })
                 .AddRoles<AppRole>()
                 .AddRoleManager<RoleManager<AppRole>>()
-                .AddEntityFrameworkStores<DataContext>();
+                .AddEntityFrameworkStores<DataContext>()
+                .AddTokenProvider<DataProtectorTokenProvider<AppUser>>(TokenOptions.DefaultProvider);
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                  .AddJwtBearer(options => {
@@ -36,6 +39,13 @@ namespace API.Extensions
                 options.AddPolicy("RequireManagerRole", policy => policy.RequireRole("Manager"));
             });
 
+            //services.Configure<IdentityOptions>(opt =>
+            //{
+            //    opt.SignIn.RequireConfirmedEmail = true;
+            //    opt.SignIn.RequireConfirmedAccount = true;
+            //});
+
+            
 
             return services;
         }

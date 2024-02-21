@@ -16,15 +16,18 @@ namespace API.Controllers
         private readonly IEmployeeRepository _employeeRepository;
         private readonly ILeaveRequestRepository _leaveRequestRepository;
         private readonly ILeaveBalanceRepository _leaveBalanceRepository;
+        private readonly IEmailService _emailService;
 
         public LeaveRequestController(DataContext dataContext, IEmployeeRepository employeeRepository, 
             ILeaveRequestRepository leaveRequestRepository, 
-            ILeaveBalanceRepository leaveBalanceRepository)
+            ILeaveBalanceRepository leaveBalanceRepository,
+            IEmailService emailService)
         {
             this._dataContext = dataContext;
             this._employeeRepository = employeeRepository;
             this._leaveRequestRepository = leaveRequestRepository;
             this._leaveBalanceRepository = leaveBalanceRepository;
+            this._emailService = emailService;
         }
 
         [HttpPost("new-request")]
@@ -114,14 +117,30 @@ namespace API.Controllers
             var employee = await _employeeRepository.GetEmployeeByIdAsync(reviewLeaveRequestDto.EmployeeId);
             Console.WriteLine(reviewLeaveRequestDto.LeaveStatusAction);
             _leaveRequestRepository.ReviewLeaveRequest(reviewLeaveRequestDto.LeaveRequestId, reviewLeaveRequestDto.LeaveStatusAction);
-
+            var emailContentRejected = "";
             if (reviewLeaveRequestDto.LeaveStatusAction == LeaveStatusEnum.Rejected)
             {
                var leaveBalanceUpdated = await _leaveBalanceRepository.
                     UpdateLeaveBalance(employee.LeaveBalanceId, reviewLeaveRequestDto.LeaveType, 
                     reviewLeaveRequestDto.DurationDays);
+                emailContentRejected = "<h3>Your leave request is Rejected </h3>"
+                                            + "<h3>HR System Automated Email</h3>";
             }
-            
+
+            var emailContentApproved = "<h3>Your leave request is Approved </h3><br>" +
+                            "<p>Leave type:  " + reviewLeaveRequestDto.LeaveType + "</p>" +
+                            "<p>Leave Duration:  " + reviewLeaveRequestDto.DurationDays + " days </p>"
+                            + "<br><h3>HR System Automated Email</h3>";
+
+            var message = new EmailMessageDto
+            {
+                To = employee.Email,
+                Subject = "Your leave request is " + (reviewLeaveRequestDto.LeaveStatusAction == LeaveStatusEnum.Approved ? "Approved" : "Rejected"),
+                Content = reviewLeaveRequestDto.LeaveStatusAction == LeaveStatusEnum.Approved ? emailContentApproved : emailContentRejected,
+            };
+
+            _emailService.SendEmail(message);
+
             if (await _leaveRequestRepository.SaveAllAsync())
             {
                 return Ok();

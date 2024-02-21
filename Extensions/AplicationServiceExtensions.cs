@@ -1,4 +1,5 @@
 ﻿using API.Data;
+using API.DTOs;
 using API.Interfaces;
 using API.Repositories;
 using API.Services;
@@ -24,6 +25,13 @@ namespace API.Extensions
             services.AddScoped<ILeaveRequestRepository, LeaveRequestRepository>();
             services.AddScoped<ILeaveBalanceRepository, LeaveBalanceRepository>();
             services.AddScoped<IManagerRepository, ManagerRepository>();
+            services.AddScoped<IEmailService, EmailService>();
+
+            var emailConfig = config
+                .GetSection("EmailConfiguration")
+                .Get<EmailConfigurationDto>();
+            services.AddSingleton(emailConfig);
+
 
             return services;
         }
