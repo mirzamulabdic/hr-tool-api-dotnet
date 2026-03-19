@@ -1,0 +1,1 @@
+A .NET API for HR management that handles employee leave requests, approvals, and notifications. Features include user authentication, role-based access control, automated leave balance tracking, and email notifications via MailKit SMTP. Supports employee management, leave request filtering/pagination, and background services for updating leave statuses.
